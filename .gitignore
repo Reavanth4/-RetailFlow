@@ -1,0 +1,18 @@
+# IntelliJ IDEA
+.idea/
+
+# IntelliJ Module Files
+*.iml
+
+# Maven Build Output
+target/
+
+# Log Files
+*.log
+
+# Environment Variables
+.env
+
+# Operating System Files
+.DS_Store
+Thumbs.db

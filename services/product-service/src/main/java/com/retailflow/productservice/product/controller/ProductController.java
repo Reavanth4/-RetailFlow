@@ -22,12 +22,12 @@ public class ProductController {
      * Create Product
      */
     @PostMapping
-    public ProductResponse createProduct(
+    public ProductResponse createFancyProduct(
             @Valid @RequestBody ProductCreateRequest request) {
 
         ProductResponse response = productService.createProduct(request);
 
-        return response;
+       // return response;
     }
 
     /**

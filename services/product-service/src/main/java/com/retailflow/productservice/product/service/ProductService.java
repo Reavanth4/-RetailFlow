@@ -3,6 +3,7 @@ package com.retailflow.productservice.product.service;
 import com.retailflow.productservice.product.dto.request.ProductCreateRequest;
 import com.retailflow.productservice.product.dto.request.ProductUpdateRequest;
 import com.retailflow.productservice.product.dto.response.ProductResponse;
+import com.retailflow.productservice.product.entity.Product;
 
 import java.util.List;
 
@@ -18,5 +19,5 @@ public interface ProductService {
     List<ProductResponse> getAllProducts();
 
     void deleteProduct(Long productId);
-
+    List<Product>getProducts();
 }

@@ -27,7 +27,7 @@ public class ProductController {
 
         ProductResponse response = productService.createProduct(request);
 
-       // return response;
+        return response;
     }
 
     /**

@@ -67,4 +67,8 @@ import java.util.List;
     public void deleteProduct(Long productId) {
 
     }
+    @Override
+    public List<Product>getProducts(){
+        return productRepository.findAll();
+    }
 }

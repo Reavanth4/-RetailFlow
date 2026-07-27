@@ -2,49 +2,88 @@ package com.retailflow.productservice.product.controller;
 
 import com.retailflow.productservice.common.response.ApiResponse;
 import com.retailflow.productservice.product.dto.request.ProductCreateRequest;
+import com.retailflow.productservice.product.dto.request.ProductUpdateRequest;
 import com.retailflow.productservice.product.dto.response.ProductResponse;
-import com.retailflow.productservice.product.entity.Product;
 import com.retailflow.productservice.product.service.ProductService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/product")
-public class    ProductController
-{
+@RequestMapping("/api/v1/products")
+@RequiredArgsConstructor
+public class ProductController {
 
-    ProductService service;
+    private final ProductService productService;
 
-    public ProductController(ProductService service){
-        this.service = service;
+    /**
+     * Create Product
+     */
+    @PostMapping
+    public ProductResponse createProduct(
+            @Valid @RequestBody ProductCreateRequest request) {
+
+        ProductResponse response = productService.createProduct(request);
+
+        return response;
     }
-    @PostMapping("/api/v1/products")
-    public ApiResponse<ProductResponse> createResponse( @RequestBody ProductCreateRequest request)
-    {
-        ProductResponse response = service.createProduct(request);
-        Logger log=LoggerFactory.getLogger(ProductController.class);
-        log.info("This is Product Response");
-        return ApiResponse.success("Product Created Successfully" , response);
-    }
 
+    /**
+     * Get All Products
+     */
     @GetMapping
-    public String display()
-    {
-        return "helle";
+    public ApiResponse<List<ProductResponse>> getAllProducts() {
+
+        return ApiResponse.success(
+                "Products fetched successfully",
+                productService.getAllProducts()
+        );
     }
 
-    @GetMapping("/id" )
-    public String display(int id)
-    {
-        return "hello 1";
+    /**
+     * Get Product By Id
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<ProductResponse> getProductById(
+            @PathVariable Long id) {
+
+        return ApiResponse.success(
+                "Product fetched successfully",
+                productService.getProductById(id)
+        );
     }
 
-    @GetMapping("/fetchAll")
-    public List<Product> getProducts(){
-        return service.getProducts();
+    /**
+     * Update Product
+     */
+    @PutMapping("/{id}")
+    public ApiResponse<ProductResponse> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductUpdateRequest request) {
+
+        ProductResponse response =
+                productService.updateProduct(id, request);
+
+        return ApiResponse.success(
+                "Product updated successfully",
+                response
+        );
+    }
+
+    /**
+     * Delete Product
+     */
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteProduct(
+            @PathVariable Long id) {
+
+        productService.deleteProduct(id);
+
+        return ApiResponse.success(
+                "Product deleted successfully",
+                "Deleted Successfully"
+        );
     }
 }

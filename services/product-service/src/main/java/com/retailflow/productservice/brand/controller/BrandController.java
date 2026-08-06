@@ -20,7 +20,6 @@ public class BrandController {
     private final BrandService brandService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<BrandResponse> createBrand(
             @Valid @RequestBody BrandCreateRequest request) {
 
@@ -31,7 +30,7 @@ public class BrandController {
     }
 
     @GetMapping
-    public ApiResponse<List<BrandResponse>> getAllBrands() {
+    public ApiResponse<List<BrandResponse>> getAllBrandsAPI() {
 
         return ApiResponse.success(
                 "Brands fetched successfully",
@@ -39,15 +38,7 @@ public class BrandController {
         );
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<BrandResponse> getBrandById(
-            @PathVariable Long id) {
 
-        return ApiResponse.success(
-                "Brand fetched successfully",
-                brandService.getBrandById(id)
-        );
-    }
 
     @PutMapping("/{id}")
     public ApiResponse<BrandResponse> updateBrand(

@@ -1,5 +1,6 @@
 package com.retailflow.productservice.product.controller;
 
+import com.retailflow.productservice.common.dto.PageResponse;
 import com.retailflow.productservice.common.response.ApiResponse;
 import com.retailflow.productservice.product.dto.request.ProductCreateRequest;
 import com.retailflow.productservice.product.dto.request.ProductUpdateRequest;
@@ -7,9 +8,11 @@ import com.retailflow.productservice.product.dto.response.ProductResponse;
 import com.retailflow.productservice.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -22,23 +25,37 @@ public class ProductController {
      * Create Product
      */
     @PostMapping
-    public ProductResponse createFancyProduct(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<ProductResponse> createProduct(
             @Valid @RequestBody ProductCreateRequest request) {
 
-        ProductResponse response = productService.createProduct(request);
-
-        return response;
+        return ApiResponse.success(
+                "Product created successfully",
+                productService.createProduct(request)
+        );
     }
 
     /**
-     * Get All Products
+     * Get All Products (search + pagination)
      */
     @GetMapping
-    public ApiResponse<List<ProductResponse>> getAllProducts() {
+    public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id,asc") String sort) {
+
+        String[] sortParts = sort.split(",");
+        String sortBy = sortParts[0];
+        Sort.Direction sortDir = (sortParts.length > 1
+                && sortParts[1].equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDir, sortBy));
 
         return ApiResponse.success(
                 "Products fetched successfully",
-                productService.getAllProducts()
+                productService.getAllProducts(search, pageable)
         );
     }
 

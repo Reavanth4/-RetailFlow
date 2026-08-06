@@ -6,7 +6,7 @@ import com.retailflow.productservice.product.dto.response.ProductResponse;
 import com.retailflow.productservice.product.entity.Product;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring") // ->
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
 
     /**
@@ -18,14 +18,18 @@ public interface ProductMapper {
     /**
      * Convert Product Entity -> ProductResponse
      */
+    @Mapping(target = "brandId", source = "brand.id")
+    @Mapping(target = "brandName", source = "brand.name")
     ProductResponse toResponse(Product product);
 
     /**
-     * Update existing Product Entity using ProductUpdateRequest
+     * Update existing Product Entity using ProductUpdateRequest.
+     * Null values are ignored so partial updates are supported.
      */
     @BeanMapping(
             nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
     )
+    @Mapping(target = "brand", ignore = true)
     void updateEntityFromDto(ProductUpdateRequest request,
                              @MappingTarget Product product);
 

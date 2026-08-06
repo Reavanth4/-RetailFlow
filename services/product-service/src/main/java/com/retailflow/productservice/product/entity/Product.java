@@ -41,4 +41,7 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "brand_id", nullable = false)
     private Brand brand;
 
+    @Column(nullable = false)
+    private Boolean active = true;
+
 }

@@ -1,8 +1,9 @@
 package com.retailflow.productservice.product.service.imp;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.retailflow.productservice.brand.entity.Brand;
 import com.retailflow.productservice.brand.repository.BrandRepository;
+import com.retailflow.productservice.common.dto.PageResponse;
+import com.retailflow.productservice.common.exception.DuplicateResourceException;
 import com.retailflow.productservice.common.exception.ResourceNotFoundException;
 import com.retailflow.productservice.product.dto.request.ProductCreateRequest;
 import com.retailflow.productservice.product.dto.request.ProductUpdateRequest;
@@ -11,8 +12,9 @@ import com.retailflow.productservice.product.entity.Product;
 import com.retailflow.productservice.product.mapper.ProductMapper;
 import com.retailflow.productservice.product.repository.ProductRepository;
 import com.retailflow.productservice.product.service.ProductService;
-import com.sun.jdi.request.DuplicateRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-    public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
@@ -30,45 +32,85 @@ import java.util.List;
     private final ProductMapper productMapper;
 
     @Override
-    @Transactional
     public ProductResponse createProduct(ProductCreateRequest request) {
-       if(productRepository.existsBySku(request.getSku()))
-       {
-           throw new DuplicateRequestException("Product sku already exists.");
-       }
-       if(productRepository.existsByBarcode(request.getBarcode()))
-       {
-           throw new DuplicateRequestException("Product sku already exists.");
-       }
-        Brand brand = brandRepository.findById(request.getBrandId()).orElseThrow(()->
-                new ResourceNotFoundException("Brand Name not exists"));
+        validateUniqueSkuAndBarcode(request.getSku(), request.getBarcode());
+
+        Brand brand = findBrand(request.getBrandId());
+
         Product product = productMapper.toEntity(request);
         product.setBrand(brand);
-        return productMapper.toResponse(productRepository.save(product));
+        product.setActive(true);
 
+        return productMapper.toResponse(productRepository.save(product));
     }
 
     @Override
     public ProductResponse updateProduct(Long productId, ProductUpdateRequest request) {
-        return null;
+        Product product = findProduct(productId);
+
+        if (request.getSku() != null
+                && !request.getSku().equals(product.getSku())
+                && productRepository.existsBySku(request.getSku())) {
+            throw new DuplicateResourceException("Product SKU already exists.");
+        }
+        if (request.getBarcode() != null
+                && !request.getBarcode().equals(product.getBarcode())
+                && productRepository.existsByBarcode(request.getBarcode())) {
+            throw new DuplicateResourceException("Product barcode already exists.");
+        }
+
+        productMapper.updateEntityFromDto(request, product);
+
+        if (request.getBrandId() != null) {
+            product.setBrand(findBrand(request.getBrandId()));
+        }
+
+        return productMapper.toResponse(productRepository.save(product));
     }
 
     @Override
     public ProductResponse getProductById(Long productId) {
-        return null;
+        return productMapper.toResponse(findProduct(productId));
     }
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        return List.of();
+    public PageResponse<ProductResponse> getAllProducts(String search, Pageable pageable) {
+        Page<Product> page = (search == null || search.isBlank())
+                ? productRepository.findByActiveTrue(pageable)
+                : productRepository.search(search.toLowerCase(), pageable);
+
+        List<ProductResponse> content = page.getContent().stream()
+                .map(productMapper::toResponse)
+                .toList();
+
+        return PageResponse.from(page, content);
     }
 
     @Override
     public void deleteProduct(Long productId) {
-
+        Product product = findProduct(productId);
+        product.setActive(false);
+        productRepository.save(product);
     }
-    @Override
-    public List<Product>getProducts(){
-        return productRepository.findAll();
+
+    private Product findProduct(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product not found with id: " + productId));
+    }
+
+    private Brand findBrand(Long brandId) {
+        return brandRepository.findById(brandId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Brand not found with id: " + brandId));
+    }
+
+    private void validateUniqueSkuAndBarcode(String sku, String barcode) {
+        if (productRepository.existsBySku(sku)) {
+            throw new DuplicateResourceException("Product SKU already exists.");
+        }
+        if (productRepository.existsByBarcode(barcode)) {
+            throw new DuplicateResourceException("Product barcode already exists.");
+        }
     }
 }

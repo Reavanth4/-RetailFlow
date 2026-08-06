@@ -1,11 +1,10 @@
 package com.retailflow.productservice.product.service;
 
+import com.retailflow.productservice.common.dto.PageResponse;
 import com.retailflow.productservice.product.dto.request.ProductCreateRequest;
 import com.retailflow.productservice.product.dto.request.ProductUpdateRequest;
 import com.retailflow.productservice.product.dto.response.ProductResponse;
-import com.retailflow.productservice.product.entity.Product;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
@@ -16,8 +15,7 @@ public interface ProductService {
 
     ProductResponse getProductById(Long productId);
 
-    List<ProductResponse> getAllProducts();
+    PageResponse<ProductResponse> getAllProducts(String search, Pageable pageable);
 
     void deleteProduct(Long productId);
-    List<Product>getProducts();
 }

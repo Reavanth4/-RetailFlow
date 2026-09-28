@@ -1,6 +1,7 @@
 package com.retailflow.salesservice.client;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -10,8 +11,9 @@ public class InventoryClient implements InventoryGateway {
 
     private final RestClient restClient;
 
-    public InventoryClient(@Value("${inventory-service.url}") String inventoryServiceUrl) {
-        this.restClient = RestClient.builder().baseUrl(inventoryServiceUrl).build();
+    public InventoryClient(@LoadBalanced RestClient.Builder builder,
+                           @Value("${inventory-service.url:http://inventory-service}") String inventoryServiceUrl) {
+        this.restClient = builder.baseUrl(inventoryServiceUrl).build();
     }
 
     @Override

@@ -15,4 +15,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByBillId(Long billId);
 
     List<Payment> findByBillIdAndStatus(Long billId, TransactionStatus status);
+
+    boolean existsByTransactionReference(String transactionReference);
 }

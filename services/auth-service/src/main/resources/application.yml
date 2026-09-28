@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: auth-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  datasource:
+    url: jdbc:h2:mem:retailflowauthdb
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: ${AUTH_SERVICE_PORT:8091}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-this-development-secret-before-running-production}
+    expiration: ${JWT_EXPIRATION:PT2H}
+    issuer: retailflow-auth
+
+retailflow:
+  admin:
+    name: ${RETAILFLOW_ADMIN_NAME:RetailFlow Administrator}
+    email: ${RETAILFLOW_ADMIN_EMAIL:}
+    password: ${RETAILFLOW_ADMIN_PASSWORD:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

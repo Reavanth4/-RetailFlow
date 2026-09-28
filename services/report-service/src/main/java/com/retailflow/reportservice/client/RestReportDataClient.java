@@ -3,6 +3,7 @@ package com.retailflow.reportservice.client;
 import com.retailflow.reportservice.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -18,14 +19,15 @@ public class RestReportDataClient implements ReportDataClient {
     private final RestClient purchaseClient;
     private final RestClient inventoryClient;
 
-    public RestReportDataClient(@Value("${product-service.url}") String productServiceUrl,
+    public RestReportDataClient(@LoadBalanced RestClient.Builder builder,
+                                @Value("${product-service.url:http://product-service}") String productServiceUrl,
                                 @Value("${sales-service.url}") String salesServiceUrl,
                                 @Value("${purchase-service.url}") String purchaseServiceUrl,
                                 @Value("${inventory-service.url}") String inventoryServiceUrl) {
-        this.productClient = RestClient.builder().baseUrl(productServiceUrl).build();
-        this.salesClient = RestClient.builder().baseUrl(salesServiceUrl).build();
-        this.purchaseClient = RestClient.builder().baseUrl(purchaseServiceUrl).build();
-        this.inventoryClient = RestClient.builder().baseUrl(inventoryServiceUrl).build();
+        this.productClient = builder.clone().baseUrl(productServiceUrl).build();
+        this.salesClient = builder.clone().baseUrl(salesServiceUrl).build();
+        this.purchaseClient = builder.clone().baseUrl(purchaseServiceUrl).build();
+        this.inventoryClient = builder.clone().baseUrl(inventoryServiceUrl).build();
     }
 
     @Override

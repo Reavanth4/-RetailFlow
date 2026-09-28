@@ -1,0 +1,44 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: ${FRONTEND_ORIGIN:http://localhost:5173}
+            allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+            allowed-headers: '*'
+            allow-credentials: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates: [Path=/api/v1/auth/**,/api/v1/users/**]
+        - id: product-service
+          uri: lb://product-service
+          predicates: [Path=/api/v1/products/**,/api/v1/brands/**]
+        - id: warehouse-service
+          uri: lb://warehouse-service
+          predicates: [Path=/api/v1/warehouses/**]
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates: [Path=/api/v1/inventory/**]
+        - id: supplier-service
+          uri: lb://supplier-service
+          predicates: [Path=/api/v1/suppliers/**]
+        - id: purchase-service
+          uri: lb://purchase-service
+          predicates: [Path=/api/v1/purchases/**,/api/v1/purchase-returns/**]
+        - id: customer-service
+          uri: lb://customer-service
+          predicates: [Path=/api/v1/customers/**]
+        - id: sales-service
+          uri: lb://sales-service
+          predicates: [Path=/api/v1/sales/**,/api/v1/cart/**,/api/v1/orders/**]
+        - id: billing-service
+          uri: lb://billing-service
+          predicates: [Path=/api/v1/bills/**,/api/v1/payments/**]
+        - id: report-service
+          uri: lb://report-service
+          predicates: [Path=/api/v1/reports/**]
+        - id: notification-service
+          uri: lb://notification-service
+          predicates: [Path=/api/v1/notifications/**]

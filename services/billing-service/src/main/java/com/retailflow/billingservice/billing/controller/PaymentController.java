@@ -1,8 +1,11 @@
 package com.retailflow.billingservice.billing.controller;
 
 import com.retailflow.billingservice.billing.dto.request.PaymentCreateRequest;
+import com.retailflow.billingservice.billing.dto.request.RazorpayVerifyRequest;
 import com.retailflow.billingservice.billing.dto.response.PaymentResponse;
+import com.retailflow.billingservice.billing.dto.response.RazorpayOrderResponse;
 import com.retailflow.billingservice.billing.service.PaymentService;
+import com.retailflow.billingservice.billing.service.RazorpayPaymentService;
 import com.retailflow.billingservice.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,19 @@ import java.util.List;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final RazorpayPaymentService razorpayPaymentService;
+
+    @PostMapping("/razorpay/orders/{billId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<RazorpayOrderResponse> createRazorpayOrder(@PathVariable Long billId) {
+        return ApiResponse.success("Razorpay order created", razorpayPaymentService.createOrder(billId));
+    }
+
+    @PostMapping("/razorpay/verify")
+    public ApiResponse<PaymentResponse> verifyRazorpayPayment(
+            @Valid @RequestBody RazorpayVerifyRequest request) {
+        return ApiResponse.success("Payment verified successfully", razorpayPaymentService.verify(request));
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
